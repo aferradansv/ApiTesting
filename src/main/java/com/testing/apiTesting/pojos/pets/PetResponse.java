@@ -1,11 +1,11 @@
-package com.testing.apiTesting.pojos.addPet;
+package com.testing.apiTesting.pojos.pets;
 
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class AddPetResponse {
+public class PetResponse {
 
     private String id;
     private PetCategory category;

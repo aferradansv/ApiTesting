@@ -6,14 +6,10 @@ import com.aventstack.extentreports.Status;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
 import com.aventstack.extentreports.reporter.configuration.ExtentSparkReporterConfig;
 import com.aventstack.extentreports.reporter.configuration.Theme;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ExtentTestManager {
-
-    @Autowired
-    private World world;
 
     private ExtentTest test;
 
@@ -43,28 +39,19 @@ public class ExtentTestManager {
         extentReports.flush();
     }
 
-    public void addApiCallsToReport(Status status) {
-        getTest().log(status, reportTableResultForAPICalls());
-        world.getRequestWriter().getBuffer().setLength(0);
-        world.getResponseWriter().getBuffer().setLength(0);
+    public void addApiCallsToReport(Status status, String request, String response, long time) {
+        getTest().log(status, reportTableResultForAPICalls(request, response, time));
     }
 
-    private String reportTableResultForAPICalls() {
+    private String reportTableResultForAPICalls(String request, String response, long time) {
         String[][] data = new String[2][3];
         data[0][0] = "Request Details";
         data[0][1] = "Response Details";
         data[0][2] = "Time (ms)";
-        data[1][0] = getMarkup(world.getRequestWriter().toString());
-        data[1][1] = getMarkup(world.getResponseWriter().toString());
-        data[1][2] = String.valueOf(getResponseTime());
+        data[1][0] = getMarkup(request);
+        data[1][1] = getMarkup(response);
+        data[1][2] = String.valueOf(time);
         return getMarkUpForTable(data);
-    }
-
-    private long getResponseTime() {
-        if (world.getResponse() != null)
-            return world.getResponse().time();
-        else
-            return 0;
     }
 
     private String getMarkup(String code) {

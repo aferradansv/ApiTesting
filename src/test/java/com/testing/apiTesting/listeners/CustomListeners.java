@@ -33,8 +33,7 @@ public class CustomListeners implements ITestListener {
 
     @Override
     public void onTestFailure(ITestResult result) {
-        testManager.addApiCallsToReport(Status.FAIL);
-        testManager.getTest().log(Status.FAIL, result.getName() + " Failed with exception : " + result.getThrowable());
+        testManager.getTest().log(Status.FAIL, result.getName() + " Error --> " + result.getThrowable());
         testManager.endTest();
     }
 

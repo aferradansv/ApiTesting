@@ -2,21 +2,18 @@ package com.testing.apiTesting.petStoreApi;
 
 import com.aventstack.extentreports.Status;
 import com.github.javafaker.Faker;
-import com.testing.apiTesting.utils.World;
+import com.testing.apiTesting.pojos.pets.AddPetRequest;
+import com.testing.apiTesting.pojos.pets.PetCategory;
+import com.testing.apiTesting.pojos.pets.PetResponse;
+import com.testing.apiTesting.pojos.pets.PetTags;
 import com.testing.apiTesting.utils.ExtentTestManager;
-import com.testing.apiTesting.pojos.addPet.AddPetRequest;
-import com.testing.apiTesting.pojos.addPet.PetCategory;
-import com.testing.apiTesting.pojos.addPet.PetTags;
+import com.testing.apiTesting.utils.LogApiToExtentReports;
 import io.restassured.RestAssured;
-import io.restassured.filter.log.RequestLoggingFilter;
-import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.testng.Assert;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -27,10 +24,7 @@ import static io.restassured.RestAssured.given;
 public class ReusableMethodsPetStore {
 
     @Autowired
-    private World world;
-
-    @Autowired
-    private ExtentTestManager extentTestManager;
+    private ExtentTestManager testManager;
 
     @Value("${petStore.base.url}")
     private String baseURL;
@@ -52,30 +46,22 @@ public class ReusableMethodsPetStore {
         }});
         request.setStatus("available");
 
-        world.setResponse(given().spec(getSpecRequest())
+        PetResponse response = given().spec(getSpecRequest())
                 .accept(ContentType.JSON).contentType(ContentType.JSON).body(request)
                 .when().post("/pet")
-                .then().log().all().extract().response());
+                .then().log().all().statusCode(200)
+                .extract().response().as(PetResponse.class);
 
-        extentTestManager.addApiCallsToReport(Status.PASS);
-
-        Assert.assertEquals(world.getResponse().statusCode(), 200);
-        extentTestManager.getTest().log(Status.PASS, "The Status Code returned is " + world.getResponse().statusCode() + "as expected");
-
-        JsonPath jp = new JsonPath(world.getResponse().body().asString());
-        String id = jp.getString("id");
-        extentTestManager.getTest().log(Status.INFO, "The petID is : " + id);
-        return id;
+        testManager.getTest().log(Status.INFO, "The petID is : " + response.getId());
+        return response.getId();
     }
 
 
     public RequestSpecification getSpecRequest(){
         RequestSpecification requestSpec = RestAssured.given();
         requestSpec.log().all().header("api_key", key)
-                .filter(new RequestLoggingFilter(world.getRequestCapture()))
-                .filter(new ResponseLoggingFilter(world.getResponseCapture()))
-                .baseUri(baseURL);
-
+                .baseUri(baseURL)
+                .filter(new LogApiToExtentReports());
         return requestSpec;
     }
 

@@ -1,4 +1,4 @@
-package com.testing.apiTesting.pojos.addPet;
+package com.testing.apiTesting.pojos.pets;
 
 import lombok.Data;
 
