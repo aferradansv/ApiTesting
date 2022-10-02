@@ -8,6 +8,7 @@
         <classes>
             <class name="com.testing.apiTesting.petStoreApi.pets.AddPetTestCase"/>
             <class name="com.testing.apiTesting.petStoreApi.pets.GetPetTestCase"/>
+            <class name="com.testing.apiTesting.petStoreApi.pets.UpdatePetTestCase"/>
         </classes>
     </test>
 </suite>

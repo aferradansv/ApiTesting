@@ -8,6 +8,9 @@ public class PetTags {
     private int id;
     private String dog;
 
+    public PetTags() {
+    }
+
     public PetTags(int id, String dog) {
         this.id = id;
         this.dog = dog;

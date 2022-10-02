@@ -17,7 +17,7 @@ public class ExtentTestManager {
 
     public ExtentTestManager() {
         extentReports = new ExtentReports();
-        ExtentSparkReporter spark = new ExtentSparkReporter("src/test/java/test-output/TestReport.html");
+        ExtentSparkReporter spark = new ExtentSparkReporter("src/test-output/TestReport.html");
         spark.config(
                 ExtentSparkReporterConfig.builder()
                         .theme(Theme.DARK)
@@ -62,7 +62,6 @@ public class ExtentTestManager {
 
     private String getMarkUpForTable(String[][] data) {
         StringBuilder sb = new StringBuilder();
-        //sb.append("<table height='10' width='10'>");
         sb.append("<table style='height:auto;width:auto'>");
         for (String[] datum : data) {
             sb.append("<tr>");

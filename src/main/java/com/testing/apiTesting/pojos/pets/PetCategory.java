@@ -5,10 +5,13 @@ import lombok.Data;
 @Data
 public class PetCategory {
 
-    private int id;
+    private String id;
     private String name;
 
-    public PetCategory(int id, String name) {
+    public PetCategory() {
+    }
+
+    public PetCategory(String id, String name) {
         this.id = id;
         this.name = name;
     }

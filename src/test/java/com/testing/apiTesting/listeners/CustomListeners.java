@@ -22,7 +22,12 @@ public class CustomListeners implements ITestListener {
         getExtentTestManager();
         Method method = result.getMethod().getConstructorOrMethod().getMethod();
         Test test = method.getAnnotation(Test.class);
-        testManager.startTest(test.testName(), test.description());
+        String testName;
+        if (result.getParameters().length != 0)
+            testName = test.testName() + " - " + result.getParameters()[0];
+        else
+            testName = test.testName();
+        testManager.startTest(testName, test.description());
     }
 
     @Override

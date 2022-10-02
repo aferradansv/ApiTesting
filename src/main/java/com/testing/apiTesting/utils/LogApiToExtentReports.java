@@ -12,8 +12,16 @@ import io.restassured.http.Headers;
 import io.restassured.response.Response;
 import io.restassured.specification.FilterableRequestSpecification;
 import io.restassured.specification.FilterableResponseSpecification;
+import lombok.SneakyThrows;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Map;
+import java.util.logging.XMLFormatter;
 
 import static com.google.gson.JsonParser.parseString;
 
@@ -25,6 +33,7 @@ public class LogApiToExtentReports implements Filter {
         testManager = SpringContext.getBean(ExtentTestManager.class);
     }
 
+    @SneakyThrows
     @Override
     public Response filter(FilterableRequestSpecification requestSpec, FilterableResponseSpecification responseSpec, FilterContext ctx) {
         getExtentTestManager();
@@ -64,13 +73,24 @@ public class LogApiToExtentReports implements Filter {
         return returnString.toString();
     }
 
-    private String getBodyString(Object body) {
+    private String getBodyString(Object body) throws IOException, DocumentException {
         if (body != null) {
             String bodyToString = body.toString().trim();
             if (bodyToString.startsWith("{")) {
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 JsonElement je = parseString(body.toString().trim());
                 return gson.toJson(je);
+            } else if (bodyToString.startsWith("<")) {
+                OutputFormat format = OutputFormat.createPrettyPrint();
+                format.setIndentSize(2);
+                format.setSuppressDeclaration(true);
+                format.setEncoding("UTF-8");
+
+                org.dom4j.Document document = DocumentHelper.parseText(bodyToString);
+                StringWriter sw = new StringWriter();
+                XMLWriter writer = new XMLWriter(sw, format);
+                writer.write(document);
+                return sw.toString();
             } else {
                 return bodyToString;
             }
