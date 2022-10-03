@@ -9,6 +9,21 @@
             <class name="com.testing.apiTesting.petStoreApi.pets.AddPetTestCase"/>
             <class name="com.testing.apiTesting.petStoreApi.pets.GetPetTestCase"/>
             <class name="com.testing.apiTesting.petStoreApi.pets.UpdatePetTestCase"/>
+            <class name="com.testing.apiTesting.petStoreApi.pets.DeletePetsTestCase"/>
+        </classes>
+    </test>
+    <test name="Store">
+        <classes>
+            <class name="com.testing.apiTesting.petStoreApi.store.StoreTestCase"/>
+        </classes>
+    </test>
+    <test name="User">
+        <classes>
+            <class name="com.testing.apiTesting.petStoreApi.users.CreateUsersTestCase"/>
+            <class name="com.testing.apiTesting.petStoreApi.users.GetUsersTestCase"/>
+            <class name="com.testing.apiTesting.petStoreApi.users.UpdateUserTestCase"/>
+            <class name="com.testing.apiTesting.petStoreApi.users.DeleteUserTestCase"/>
+            <class name="com.testing.apiTesting.petStoreApi.users.LogOpsTestCase"/>
         </classes>
     </test>
 </suite>

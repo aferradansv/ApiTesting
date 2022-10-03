@@ -1,7 +1,10 @@
 package com.testing.apiTesting.petStoreApi;
 
 import com.aventstack.extentreports.Status;
+import com.testing.apiTesting.pojos.ApiMessage;
+import com.testing.apiTesting.pojos.user.User;
 import com.testing.apiTesting.pojos.pets.Pet;
+import com.testing.apiTesting.pojos.store.Order;
 import com.testing.apiTesting.utils.ExtentTestManager;
 import com.testing.apiTesting.utils.LogApiToExtentReports;
 import io.restassured.RestAssured;
@@ -37,6 +40,27 @@ public class ReusableMethodsPetStore {
         return response;
     }
 
+    public Order addOrder(){
+        Order response = given().spec(getSpecRequest()).body(new Order())
+                .accept(ContentType.JSON).contentType(ContentType.JSON)
+                .when().post("/store/order")
+                .then().statusCode(200).extract().response().as(Order.class);
+
+        testManager.getTest().log(Status.PASS, "The order id returned is: " + response.getId());
+        return response;
+    }
+
+    public User addUser() {
+        User user = new User();
+        ApiMessage message = given().spec(getSpecRequest()).body(user)
+                .accept(ContentType.JSON).contentType(ContentType.JSON)
+                .when().post("/user")
+                .then().statusCode(200).extract().response().as(ApiMessage.class);
+
+        user.setId(message.getMessage());
+        testManager.getTest().log(Status.PASS, "The user is created successfully");
+        return user;
+    }
 
     public RequestSpecification getSpecRequest(){
         RequestSpecification requestSpec = RestAssured.given();
@@ -45,5 +69,6 @@ public class ReusableMethodsPetStore {
                 .filter(new LogApiToExtentReports());
         return requestSpec;
     }
+
 
 }

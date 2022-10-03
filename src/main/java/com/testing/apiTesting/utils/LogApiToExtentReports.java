@@ -20,8 +20,8 @@ import org.dom4j.io.XMLWriter;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.List;
 import java.util.Map;
-import java.util.logging.XMLFormatter;
 
 import static com.google.gson.JsonParser.parseString;
 
@@ -80,12 +80,28 @@ public class LogApiToExtentReports implements Filter {
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 JsonElement je = parseString(body.toString().trim());
                 return gson.toJson(je);
+            } else if (bodyToString.startsWith("[{")){
+                StringBuilder returnString = new StringBuilder();
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                bodyToString = bodyToString.replace("[", "").replace("]", "");
+                List<String> jsonList = List.of(bodyToString.split("},"));
+                returnString.append("[");
+                for (int i =0; i< jsonList.size(); i++) {
+                    String json = jsonList.get(i);
+                    if (i != jsonList.size()-1)
+                        json = jsonList.get(i) + "}";
+                    JsonElement je = parseString(json);
+                    returnString.append(gson.toJson(je));
+                    if (i != jsonList.size()-1)
+                        returnString.append(",").append(System.lineSeparator());
+                }
+                returnString.append("]");
+                return returnString.toString();
             } else if (bodyToString.startsWith("<")) {
                 OutputFormat format = OutputFormat.createPrettyPrint();
                 format.setIndentSize(2);
                 format.setSuppressDeclaration(true);
                 format.setEncoding("UTF-8");
-
                 org.dom4j.Document document = DocumentHelper.parseText(bodyToString);
                 StringWriter sw = new StringWriter();
                 XMLWriter writer = new XMLWriter(sw, format);

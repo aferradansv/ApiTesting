@@ -5,13 +5,14 @@ import com.github.javafaker.Faker;
 import com.testing.apiTesting.ApiTestingApplication;
 import com.testing.apiTesting.listeners.CustomListeners;
 import com.testing.apiTesting.petStoreApi.ReusableMethodsPetStore;
-import com.testing.apiTesting.pojos.pets.ApiMessage;
+import com.testing.apiTesting.pojos.ApiMessage;
 import com.testing.apiTesting.pojos.pets.Pet;
 import com.testing.apiTesting.utils.ExtentTestManager;
 import io.restassured.http.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -31,6 +32,18 @@ public class GetPetTestCase extends AbstractTestNGSpringContextTests {
     @Autowired
     private ExtentTestManager testManager;
 
+    @DataProvider(name = "test-data")
+    public Object[][] listOfStatus() {
+        return new Object[][]{
+                {"available", "sold,pending"},
+                {"sold", "available,pending"},
+                {"pending", "sold,available"},
+                {"available,sold", "pending"},
+                {"available,pending", "sold"},
+                {"sold,pending", "available"}
+        };
+    }
+
     @Test(testName = "Get Pet by Id",
             description = "Retrieve the Pet details using an existing Id")
     public void GetPetById() {
@@ -39,7 +52,7 @@ public class GetPetTestCase extends AbstractTestNGSpringContextTests {
                 .when().get("/pet/{petId}")
                 .then().statusCode(200).extract().response().as(Pet.class);
 
-        assertEquals(pet.getId(), response.getId());
+        assertThat(pet).usingRecursiveComparison().isEqualTo(response);
         testManager.getTest().log(Status.PASS, "The id returned in the get call: " + response.getId() + " is the same as the id when created " + pet.getId());
     }
 
@@ -69,71 +82,22 @@ public class GetPetTestCase extends AbstractTestNGSpringContextTests {
                 .then().log().all().statusCode(405);
     }
 
-    @Test(testName = "Get Pet by Status - Available",
-            description = "Retrieve the Pet details filtering by their statuses")
-    public void getListPetsByStatusAvailable() {
-        String status = "available";
+
+    @Test(testName = "Get Pet by Status",
+            description = "Retrieve the Pet details filtering by their statuses",
+              dataProvider = "test-data" )
+    public void assertListPetsByStatus(String status, String excluded) {
         List<Pet> listOfPets = getListOfPetsByStatus(status);
+        String[] listValidStatus = status.split(",");
+        String[] listInvalidStatus = excluded.split(",");
         assertThat(listOfPets).isNotEmpty().extracting(Pet::getStatus)
-                .contains("available").doesNotContain("sold").doesNotContain("pending");
-        testManager.getTest().log(Status.PASS, "Only pets with status " + status + " have been displayed");
-    }
-
-    @Test(testName = "Get Pet by Status - Pending",
-            description = "Retrieve the Pet details filtering by their statuses")
-    public void getListPetsByStatusPending() {
-        String status = "pending";
-        List<Pet> listOfPets = getListOfPetsByStatus(status);
-        assertThat(listOfPets).isNotEmpty().extracting(Pet::getStatus)
-                .contains("pending").doesNotContain("sold").doesNotContain("available");
-        testManager.getTest().log(Status.PASS, "Only pets with status " + status + " have been displayed");
-    }
-
-    @Test(testName = "Get Pet by Status - Sold",
-            description = "Retrieve the Pet details filtering by their statuses")
-    public void getListPetsByStatusSold() {
-        String status = "sold";
-        List<Pet> listOfPets = getListOfPetsByStatus(status);
-        assertThat(listOfPets).isNotEmpty().extracting(Pet::getStatus)
-                .contains("sold").doesNotContain("available").doesNotContain("pending");
-        testManager.getTest().log(Status.PASS, "Only pets with status " + status + " have been displayed");
-    }
-
-    @Test(testName = "Get Pet by Status - Available, Sold",
-            description = "Retrieve the Pet details filtering by their statuses")
-    public void getListPetsByStatusAvailableSold() {
-        String status = "available,sold";
-        List<Pet> listOfPets = getListOfPetsByStatus(status);
-        assertThat(listOfPets).isNotEmpty().extracting(Pet::getStatus)
-                .contains("available").contains("sold").doesNotContain("pending");
-        testManager.getTest().log(Status.PASS, "Only pets with status " + status + " have been displayed");
-    }
-
-
-    @Test(testName = "Get Pet by Status - Pending, Sold",
-            description = "Retrieve the Pet details filtering by their statuses")
-    public void getListPetsByStatusPendingSold() {
-        String status = "pending,sold";
-        List<Pet> listOfPets = getListOfPetsByStatus(status);
-        assertThat(listOfPets).isNotEmpty().extracting(Pet::getStatus)
-                .contains("pending").contains("sold").doesNotContain("available");
-        testManager.getTest().log(Status.PASS, "Only pets with status " + status + " have been displayed");
-    }
-
-
-    @Test(testName = "Get Pet by Status - Available, Pending",
-            description = "Retrieve the Pet details filtering by their statuses")
-    public void getListPetsByStatusAvailablePending() {
-        String status = "available,pending";
-        List<Pet> listOfPets = getListOfPetsByStatus(status);
-        assertThat(listOfPets).isNotEmpty().extracting(Pet::getStatus)
-                .contains("pending").contains("available").doesNotContain("sold");
+                .contains(listValidStatus).doesNotContain(listInvalidStatus);
         testManager.getTest().log(Status.PASS, "Only pets with status " + status + " have been displayed");
     }
 
     @Test(testName = "Get Pet by Status - Wrong Status",
             description = "Retrieve the Pet details filtering by their statuses")
-    public void getListPetsByStatusWrongStatus() {
+    public void assertListPetsByStatusWrongStatus() {
         String status = "wrongStatus";
         List<Pet> listOfPets = getListOfPetsByStatus(status);
         assertThat(listOfPets).isEmpty();
