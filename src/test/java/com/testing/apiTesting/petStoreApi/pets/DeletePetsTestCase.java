@@ -4,7 +4,7 @@ import com.aventstack.extentreports.Status;
 import com.testing.apiTesting.ApiTestingApplication;
 import com.testing.apiTesting.listeners.CustomListeners;
 import com.testing.apiTesting.petStoreApi.ReusableMethodsPetStore;
-import com.testing.apiTesting.pojos.pets.ApiMessage;
+import com.testing.apiTesting.pojos.ApiMessage;
 import com.testing.apiTesting.pojos.pets.Pet;
 import com.testing.apiTesting.utils.ExtentTestManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Listeners(CustomListeners.class)
 @SpringBootTest(classes = ApiTestingApplication.class)
-public class DeletePetsApi extends AbstractTestNGSpringContextTests {
+public class DeletePetsTestCase extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private ReusableMethodsPetStore methods;
